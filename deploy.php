@@ -4,10 +4,14 @@ namespace Deployer;
 require 'recipe/laravel.php';
 
 // Project name
-set('application', 'my_project');
+set('application', 'indigo');
+
+set('default_stage', 'staging');
+set('branch', 'develop');
 
 // Project repository
-set('repository', 'git@github.com:MilesPong/indigo.git');
+// set('repository', 'git@github.com:MilesPong/indigo.git');
+set('repository', '/home/miles/docker-vm-share/git-repo/indigo.git');
 
 // [Optional] Allocate tty for git clone. Default value is false.
 set('git_tty', true); 
@@ -22,19 +26,34 @@ set('allow_anonymous_stats', false);
 
 // Hosts
 
-host('project.com')
-    ->set('deploy_path', '~/{{application}}');    
+localhost()
+    ->stage('staging')
+    ->set('deploy_path', '~/docker-vm-share/www/{{application}}');    
     
-// Tasks
-
-task('build', function () {
-    run('cd {{release_path}} && build');
-});
+/**
+ * Main task
+ */
+desc('Deploy your project');
+task('deploy', [
+    'deploy:info',
+    'deploy:prepare',
+    'deploy:lock',
+    'deploy:release',
+    'deploy:update_code',
+    'deploy:shared',
+    'deploy:vendors',
+    'deploy:writable',
+    'artisan:storage:link',
+    'artisan:view:clear',
+    'artisan:cache:clear',
+    'artisan:config:cache',
+    'artisan:route:cache',
+    'artisan:optimize',
+    'artisan:migrate',
+    'deploy:symlink',
+    'deploy:unlock',
+    'cleanup',
+]);
 
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
-
-// Migrate database before symlink new release.
-
-before('deploy:symlink', 'artisan:migrate');
-
