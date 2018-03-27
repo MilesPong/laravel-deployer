@@ -102,3 +102,9 @@ task('npm:run:admin-dev', function () {
 // After npm install.
 after('npm:install', 'npm:run:development');
 // after('npm:install', 'npm:run:production');
+
+// Load env
+task('load:dotenv', function () {
+    (new \Symfony\Component\Dotenv\Dotenv())->load('.env');
+})->desc('Load DotEnv values');
+before('deploy', 'load:dotenv');
