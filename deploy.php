@@ -3,6 +3,7 @@ namespace Deployer;
 
 require 'recipe/laravel.php';
 require 'recipe/npm.php';
+require 'recipe/slack.php';
 
 // Project name
 set('application', 'indigo');
@@ -106,5 +107,14 @@ after('npm:install', 'npm:run:development');
 // Load env
 task('load:dotenv', function () {
     (new \Symfony\Component\Dotenv\Dotenv())->load('.env');
+
+    set('slack_webhook', function () {
+        return getenv('SLACK_WEBHOOK');
+    });
 })->desc('Load DotEnv values');
-before('deploy', 'load:dotenv');
+
+// Webhook
+before('deploy', 'slack:notify');
+before('slack:notify', 'load:dotenv');
+after('success', 'slack:notify:success');
+after('deploy:failed', 'slack:notify:failure');
