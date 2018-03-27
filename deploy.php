@@ -19,6 +19,14 @@ add('shared_dirs', []);
 add('writable_dirs', []);
 set('allow_anonymous_stats', false);
 
+// Load env file
+task('load:dotenv', function () {
+    (new \Symfony\Component\Dotenv\Dotenv())->load('.env');
+    array_map(function ($var) {
+        set($var, getenv($var));
+    }, explode(',', $_SERVER['SYMFONY_DOTENV_VARS']));
+});
+
 // Hosts
 inventory('hosts.yml');
 
@@ -71,17 +79,10 @@ task('npm:run', function () {
 });
 after('npm:install', 'npm:run');
 
-// Load env
-task('load:dotenv', function () {
-    (new \Symfony\Component\Dotenv\Dotenv())->load('.env');
-
-    set('slack_webhook', function () {
-        return getenv('SLACK_WEBHOOK');
-    });
-})->desc('Load DotEnv values');
-
 // Webhook
 before('deploy', 'slack:notify');
-before('slack:notify', 'load:dotenv');
 after('success', 'slack:notify:success');
 after('deploy:failed', 'slack:notify:failure');
+
+// This should be placed at last, and will be called at first
+before('deploy', 'load:dotenv');
