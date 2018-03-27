@@ -1,0 +1,24 @@
+remote_host:
+  hostname: domain.com
+  user: someuser
+  port: 22
+  identityFile: ~/.ssh/id_rsa
+  forwardAgent: true
+  multiplexing: true
+  sshOptions:
+    UserKnownHostsFile: /dev/null
+    StrictHostKeyChecking: no
+  stage: production
+  roles:
+    - app
+  deploy_path: /path/to/deploy
+  repository: https://example.com/project.git
+
+localhost:
+  local: true
+  roles:
+    - test
+    - app
+  stage: development
+  deploy_path: /path/to/deploy
+  repository: /path/to/project.git

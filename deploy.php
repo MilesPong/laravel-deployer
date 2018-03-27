@@ -8,13 +8,6 @@ require 'recipe/slack.php';
 // Project name
 set('application', 'indigo');
 
-set('default_stage', 'staging');
-set('branch', 'develop');
-
-// Project repository
-// set('repository', 'git@github.com:MilesPong/indigo.git');
-set('repository', '/home/miles/docker-vm-share/git-repo/indigo.git');
-
 // [Optional] Allocate tty for git clone. Default value is false.
 set('git_tty', true); 
 
@@ -27,11 +20,8 @@ add('writable_dirs', []);
 set('allow_anonymous_stats', false);
 
 // Hosts
+inventory('hosts.yml');
 
-localhost()
-    ->stage('staging')
-    ->set('deploy_path', '~/docker-vm-share/www/{{application}}');    
-    
 /**
  * Main task
  */
