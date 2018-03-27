@@ -62,47 +62,24 @@ task('deploy', [
 after('deploy:failed', 'deploy:unlock');
 
 // Dynamic run npm scripts
-// use Symfony\Component\Console\Input\InputOption;
-// after('npm:install', 'npm:run');
-// option('npm-env', null, InputOption::VALUE_OPTIONAL, 'NPM run environment.', 'development');
-// set('npm_env', function () {
-//     return input()->getOption('npm-env') ?: 'development';
-// });
-// task('npm:run', function () {
-//     if (get('npm_env') === 'development') {
-//         // TODO How to call another task?
-//     } else {
-
-//     }
-// });
-
-// NPM tasks.
-task('npm:run:development', [
-    'npm:run:dev',
-    'npm:run:admin-dev'
-]);
-task('npm:run:production', [
-    'npm:run:prod',
-    'npm:run:admin-prod'
-]);
-
-desc('NPM run scripts');
-task('npm:run:prod', function () {
-    run('cd {{release_path}} && {{bin/npm}} run prod');
+use Symfony\Component\Console\Input\InputOption;
+option('npm-env', null, InputOption::VALUE_OPTIONAL, 'NPM run environment.', 'dev');
+set('npm_env', function () {
+    return input()->getOption('npm-env') ?: 'dev';
 });
-task('npm:run:admin-prod', function () {
-    run('cd {{release_path}} && {{bin/npm}} run admin-prod');
-});
-task('npm:run:dev', function () {
-    run('cd {{release_path}} && {{bin/npm}} run dev');
-});
-task('npm:run:admin-dev', function () {
-    run('cd {{release_path}} && {{bin/npm}} run admin-dev');
-});
+task('npm:run', function () {
+    cd('{{release_path}}');
+    $npmEnv = get('npm_env');
 
-// After npm install.
-after('npm:install', 'npm:run:development');
-// after('npm:install', 'npm:run:production');
+    if ($npmEnv === 'dev') {
+       run('{{bin/npm}} run dev');
+       run('{{bin/npm}} run admin-dev');
+    } else if ($npmEnv === 'prod') {
+       run('{{bin/npm}} run prod');
+       run('{{bin/npm}} run admin-prod');
+    }
+});
+after('npm:install', 'npm:run');
 
 // Load env
 task('load:dotenv', function () {
