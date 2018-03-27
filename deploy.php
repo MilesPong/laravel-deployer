@@ -2,6 +2,7 @@
 namespace Deployer;
 
 require 'recipe/laravel.php';
+require 'recipe/npm.php';
 
 // Project name
 set('application', 'indigo');
@@ -49,6 +50,7 @@ task('deploy', [
     'artisan:config:cache',
     'artisan:route:cache',
     'artisan:optimize',
+    'npm:install',
     'artisan:migrate',
     'deploy:symlink',
     'deploy:unlock',
@@ -57,3 +59,24 @@ task('deploy', [
 
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
+
+// After npm install.
+after('npm:install', 'npm:run:dev');
+after('npm:install', 'npm:run:admin-dev');
+// after('npm:install', 'npm:run:prod');
+// after('npm:install', 'npm:run:admin-prod');
+
+// NPM tasks.
+desc('NPM run scripts');
+task('npm:run:prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run prod');
+});
+task('npm:run:admin-prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-prod');
+});
+task('npm:run:dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run dev');
+});
+task('npm:run:admin-dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-dev');
+});

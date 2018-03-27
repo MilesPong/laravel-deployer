@@ -1,5 +1,8 @@
 {
     "require": {
         "deployer/deployer": "^6.1"
+    },
+    "require-dev": {
+        "deployer/recipes": "^6.0"
     }
 }
