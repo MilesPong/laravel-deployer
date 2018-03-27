@@ -65,19 +65,46 @@ option('npm-env', null, InputOption::VALUE_OPTIONAL, 'NPM run environment.', 'de
 set('npm_env', function () {
     return input()->getOption('npm-env') ?: 'dev';
 });
-task('npm:run', function () {
-    cd('{{release_path}}');
+
+// NPM run scripts command.
+desc('Command: npm run dev');
+task('npm:run:dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run dev');
+});
+desc('Command: npm run admin-dev');
+task('npm:run:admin-dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-dev');
+});
+desc('Command: npm run prod');
+task('npm:run:prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run prod');
+});
+desc('Command: npm run admin-prod');
+task('npm:run:admin-prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-prod');
+});
+desc('Build development resources in npm');
+task('npm:build:dev', function () {
+    invoke('npm:run:dev');
+    invoke('npm:run:admin-dev');
+});
+desc('Build production resources in npm');
+task('npm:build:prod', function () {
+    invoke('npm:run:prod');
+    invoke('npm:run:admin-prod');
+});
+
+desc('Build npm resources');
+task('npm:build', function () {
     $npmEnv = get('npm_env');
 
     if ($npmEnv === 'dev') {
-       run('{{bin/npm}} run dev');
-       run('{{bin/npm}} run admin-dev');
+       invoke('npm:build:dev');
     } else if ($npmEnv === 'prod') {
-       run('{{bin/npm}} run prod');
-       run('{{bin/npm}} run admin-prod');
+       invoke('npm:build:prod');
     }
 });
-after('npm:install', 'npm:run');
+after('npm:install', 'npm:build');
 
 // Webhook
 before('deploy', 'slack:notify');
