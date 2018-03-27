@@ -1,6 +1,7 @@
 {
     "require": {
-        "deployer/deployer": "^6.1"
+        "deployer/deployer": "^6.1",
+        "symfony/dotenv": "^4.0"
     },
     "require-dev": {
         "deployer/recipes": "^6.0"
