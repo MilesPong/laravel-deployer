@@ -1,6 +1,8 @@
 <?php
 namespace Deployer;
 
+use Symfony\Component\Console\Input\InputOption;
+
 require 'recipe/laravel.php';
 require 'recipe/npm.php';
 require 'recipe/slack.php';
@@ -19,20 +21,68 @@ add('shared_dirs', []);
 add('writable_dirs', []);
 set('allow_anonymous_stats', false);
 
+// Dynamic run npm scripts
+option('npm-env', null, InputOption::VALUE_OPTIONAL, 'NPM run environment.', 'dev');
+set('npm_env', function () {
+    return input()->getOption('npm-env') ?: 'dev';
+});
+
+// Hosts
+inventory('hosts.yml');
+
+// Tasks
+desc('Command: npm run dev');
+task('npm:run:dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run dev');
+});
+
+desc('Command: npm run admin-dev');
+task('npm:run:admin-dev', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-dev');
+});
+
+desc('Command: npm run prod');
+task('npm:run:prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run prod');
+});
+
+desc('Command: npm run admin-prod');
+task('npm:run:admin-prod', function () {
+    run('cd {{release_path}} && {{bin/npm}} run admin-prod');
+});
+
+desc('Build development resources in npm');
+task('npm:build:dev', function () {
+    invoke('npm:run:dev');
+    invoke('npm:run:admin-dev');
+});
+
+desc('Build production resources in npm');
+task('npm:build:prod', function () {
+    invoke('npm:run:prod');
+    invoke('npm:run:admin-prod');
+});
+
+desc('Build npm resources');
+task('npm:build', function () {
+    $npmEnv = get('npm_env');
+
+    if ($npmEnv === 'dev') {
+       invoke('npm:build:dev');
+    } else if ($npmEnv === 'prod') {
+       invoke('npm:build:prod');
+    }
+});
+
 // Load env file
 task('load:dotenv', function () {
     (new \Symfony\Component\Dotenv\Dotenv())->load('.env');
     array_map(function ($var) {
         set($var, getenv($var));
     }, explode(',', $_SERVER['SYMFONY_DOTENV_VARS']));
-});
+})->setPrivate();;
 
-// Hosts
-inventory('hosts.yml');
-
-/**
- * Main task
- */
+// Main task
 desc('Deploy your project');
 task('deploy', [
     'deploy:info',
@@ -59,51 +109,6 @@ task('deploy', [
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
 
-// Dynamic run npm scripts
-use Symfony\Component\Console\Input\InputOption;
-option('npm-env', null, InputOption::VALUE_OPTIONAL, 'NPM run environment.', 'dev');
-set('npm_env', function () {
-    return input()->getOption('npm-env') ?: 'dev';
-});
-
-// NPM run scripts command.
-desc('Command: npm run dev');
-task('npm:run:dev', function () {
-    run('cd {{release_path}} && {{bin/npm}} run dev');
-});
-desc('Command: npm run admin-dev');
-task('npm:run:admin-dev', function () {
-    run('cd {{release_path}} && {{bin/npm}} run admin-dev');
-});
-desc('Command: npm run prod');
-task('npm:run:prod', function () {
-    run('cd {{release_path}} && {{bin/npm}} run prod');
-});
-desc('Command: npm run admin-prod');
-task('npm:run:admin-prod', function () {
-    run('cd {{release_path}} && {{bin/npm}} run admin-prod');
-});
-desc('Build development resources in npm');
-task('npm:build:dev', function () {
-    invoke('npm:run:dev');
-    invoke('npm:run:admin-dev');
-});
-desc('Build production resources in npm');
-task('npm:build:prod', function () {
-    invoke('npm:run:prod');
-    invoke('npm:run:admin-prod');
-});
-
-desc('Build npm resources');
-task('npm:build', function () {
-    $npmEnv = get('npm_env');
-
-    if ($npmEnv === 'dev') {
-       invoke('npm:build:dev');
-    } else if ($npmEnv === 'prod') {
-       invoke('npm:build:prod');
-    }
-});
 after('npm:install', 'npm:build');
 
 // Webhook
