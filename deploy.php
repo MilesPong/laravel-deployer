@@ -106,6 +106,10 @@ task('deploy', [
     'cleanup',
 ]);
 
+// It seems that when overrode the "deploy" task, those defined "before" and "after" related tasks
+// in laravel.php are gone, have to redefine it again.
+after('deploy', 'success');
+
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
 
