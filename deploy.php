@@ -100,6 +100,7 @@ task('deploy', [
     'artisan:route:cache',
     'artisan:optimize',
     'npm:install',
+    'npm:build',
     'artisan:migrate',
     'deploy:symlink',
     'deploy:unlock',
@@ -112,8 +113,6 @@ after('deploy', 'success');
 
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
-
-after('npm:install', 'npm:build');
 
 // Webhook
 before('deploy', 'slack:notify');
