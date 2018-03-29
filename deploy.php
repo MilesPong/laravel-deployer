@@ -82,6 +82,14 @@ task('load:dotenv', function () {
     }, explode(',', $_SERVER['SYMFONY_DOTENV_VARS']));
 })->setPrivate();;
 
+desc('Installing submodule vendors');
+task('deploy:submodule:vendors', function () {
+    if (!commandExist('unzip')) {
+        writeln('<comment>To speed up composer installation setup "unzip" command with PHP zip extension https://goo.gl/sxzFcD</comment>');
+    }
+    run('cd {{release_path}}/deployer && {{bin/composer}} {{composer_options}}');
+});
+
 // Main task
 desc('Deploy your project');
 task('deploy', [
@@ -92,6 +100,7 @@ task('deploy', [
     'deploy:update_code',
     'deploy:shared',
     'deploy:vendors',
+    'deploy:submodule:vendors',
     'deploy:writable',
     'artisan:storage:link',
     'artisan:view:clear',
