@@ -14,7 +14,10 @@ set('application', 'indigo');
 set('git_tty', true); 
 
 // Shared files/dirs between deploys 
-add('shared_files', []);
+add('shared_files', [
+    'deployer/.env',
+    'deployer/hosts.yml',
+]);
 add('shared_dirs', []);
 
 // Writable dirs by web server 
