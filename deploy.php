@@ -8,6 +8,7 @@ require 'recipe/npm.php';
 require 'recipe/slack.php';
 
 // Project name
+// https://github.com/MilesPong/indigo.git
 set('application', 'indigo');
 
 // [Optional] Allocate tty for git clone. Default value is false.
@@ -83,7 +84,7 @@ task('load:dotenv', function () {
     array_map(function ($var) {
         set($var, getenv($var));
     }, explode(',', $_SERVER['SYMFONY_DOTENV_VARS']));
-})->setPrivate();;
+})->setPrivate();
 
 desc('Installing submodule vendors');
 task('deploy:submodule:vendors', function () {
