@@ -4,4 +4,4 @@ localhost:
     - app
   stage: production
   deploy_path: /path/to/deploy
-  repository: https://example.com/project.git
+  repository: https://github.com/MilesPong/indigo.git
