@@ -94,6 +94,13 @@ task('deploy:submodule:vendors', function () {
     run('cd {{release_path}}/deployer && {{bin/composer}} {{composer_options}}');
 });
 
+desc('Reload PHP-FPM service');
+task('php-fpm:reload', function () {
+    // The user must have rights for reload service
+    // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl reload php-fpm.service
+    run('sudo systemctl reload php7.2-fpm.service');
+});
+
 // Main task
 desc('Deploy your project');
 task('deploy', [
@@ -116,6 +123,7 @@ task('deploy', [
     'npm:build',
     'artisan:migrate',
     'deploy:symlink',
+    'php-fpm:reload',
     'deploy:unlock',
     'cleanup',
 ]);
